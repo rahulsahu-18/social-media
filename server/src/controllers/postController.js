@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { Post } from "../models/post.model.js";
 import { Comment } from "../models/comments.model.js";
 
-const addPost = async (req, res) => {
+export const addPost = async (req, res) => {
   const authorId = req.id;
   const image = req.files;
   const { caption } = req.body;
@@ -41,7 +41,7 @@ const addPost = async (req, res) => {
   }
 };
 
-const getAllPosts = async (req, res) => {
+export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find()
       .sort({ createdAt: -1 })
@@ -63,7 +63,7 @@ const getAllPosts = async (req, res) => {
   }
 };
 
-const getUsersPost = async (req, res) => {
+export const getUsersPost = async (req, res) => {
   const authorId = req.id;
 
   try {
@@ -94,7 +94,7 @@ const getUsersPost = async (req, res) => {
   }
 };
 
-const likePost = async (req, res) => {
+export const likePost = async (req, res) => {
   const likeUserId = req.id;
   const postId = req.params.id;
   try {
@@ -111,7 +111,7 @@ const likePost = async (req, res) => {
   } catch (error) {}
 };
 
-const dislikePost = async (req, res) => {
+export const dislikePost = async (req, res) => {
   try {
     const userId = req.id;
     const postId = req.params.id;
@@ -127,7 +127,7 @@ const dislikePost = async (req, res) => {
   } catch (error) {}
 };
 
-const addComment = async (req, res) => {
+export const addComment = async (req, res) => {
     try {
         const postId = req.params.id;
         const commentUserId = req.id;
@@ -159,7 +159,7 @@ const addComment = async (req, res) => {
     }
 };
 
-const getCommentsOfPost = async (req, res) => {
+export const getCommentsOfPost = async (req, res) => {
     try {
         const postId = req.params.id;
 
@@ -174,7 +174,7 @@ const getCommentsOfPost = async (req, res) => {
     }
 };
 
-const deletePost = async (req, res) => {
+export const deletePost = async (req, res) => {
   const userId = req.id;
   const postId = req.params.id;
   try {
@@ -200,7 +200,7 @@ const deletePost = async (req, res) => {
   }
 };
 
-const bookMarkPost = async (req, res) => {
+export const bookMarkPost = async (req, res) => {
   const userId = req.id;
   const postId = req.params.id;
 
