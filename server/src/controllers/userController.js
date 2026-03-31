@@ -171,3 +171,66 @@ export const getSuggestedUsers = async (req, res) => {
     }
 };
 
+export const followOrUnfollow = async (req,res) => {
+   try {
+const currentUserId = req.id; // jo follow karega
+const targetUserId = req.params.id; // jisko follow karna hai
+
+    if (currentUserId === targetUserId) {
+        return res.status(400).json({
+            message: "You cannot follow/unfollow yourself",
+            success: false
+        });
+    }
+
+    
+    const user = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!user || !targetUser) {
+        return res.status(404).json({
+            message: "User not found",
+            success: false
+        });
+    }
+
+   
+    const isFollowing = user.following.some(
+        id => id.toString() === targetUserId
+    );
+
+    if (isFollowing) {
+        // UNFOLLOW
+        user.following.pull(targetUserId);
+        targetUser.followers.pull(currentUserId);
+
+        await user.save();
+        await targetUser.save();
+
+        return res.status(200).json({
+            message: "Unfollowed successfully",
+            success: true
+        });
+
+    } else {
+        // FOLLOW
+        user.following.push(targetUserId);
+        targetUser.followers.push(currentUserId);
+
+        await user.save();
+        await targetUser.save();
+
+        return res.status(200).json({
+            message: "Followed successfully",
+            success: true
+        });
+    }
+
+} catch (error) {
+    console.log(error);
+    return res.status(500).json({
+        message: "Server error",
+        success: false
+    });
+}
+}
