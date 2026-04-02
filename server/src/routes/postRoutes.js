@@ -4,7 +4,7 @@ import {isAuth} from '../middleware/isAuth.js'
 import { addComment, addPost, bookMarkPost, deletePost, dislikePost, getCommentsOfPost, getUsersPost, likePost } from '../controllers/postController.js';
 const postRouter = express.Router();
 
-postRouter.post('/add-post',upload.single('image'),addPost);
+postRouter.post('/add-post',isAuth,upload.single('image'),addPost);
 postRouter.get('/userpost/all',isAuth,getUsersPost);
 postRouter.get('/like/:id',isAuth,likePost);
 postRouter.get('/dislike/:id',isAuth,dislikePost);

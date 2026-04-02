@@ -6,25 +6,25 @@ import { Comment } from "../models/comments.model.js";
 
 export const addPost = async (req, res) => {
   const authorId = req.id;
-  const image = req.files;
+  const image = req.file;
   const { caption } = req.body;
   try {
     if (!image) return res.status(400).json({ message: "Image required" });
 
-    const optimizeImageBuffer = await sharp(image.buffer)
+    const optimizedImageBuffer = await sharp(image.buffer)
       .resize({ width: 800, height: 800, fit: "inside" })
       .toFormat("jpeg", { quality: 80 })
       .toBuffer();
 
-    //buffer to data uri
+    // buffer to data uri
     const fileUri = `data:image/jpeg;base64,${optimizedImageBuffer.toString("base64")}`;
     const cloudResponce = await cloudinary.uploader.upload(fileUri);
-    const post = await post.create({
+    const post = await Post.create({
       caption,
       image: cloudResponce.secure_url,
       author: authorId,
     });
-    const user = User.findById(authorId);
+    const user = await User.findById(authorId);
     if (user) {
       user.posts.push(post._id);
       await user.save();
@@ -108,6 +108,7 @@ export const likePost = async (req, res) => {
     await post.save();
 
     // socket for realtime notification
+    return res.status(200).json({message:"like added successfully"})
   } catch (error) {}
 };
 

@@ -6,10 +6,10 @@ import userRouter from "./src/routes/userRoutes.js";
 import postRouter from "./src/routes/postRoutes.js";
 
 dotenv.config();
+const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(urlencoded({ extended: true }));
-const app = express();
 
 app.use('/api/v1/user',userRouter);
 app.use('/api/v1/post',postRouter);
