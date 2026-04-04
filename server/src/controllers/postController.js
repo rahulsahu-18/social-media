@@ -3,6 +3,7 @@ import cloudinary from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
 import { Post } from "../models/post.model.js";
 import { Comment } from "../models/comments.model.js";
+import { getReciverSocketId, io } from "../socket/socket.js";
 
 export const addPost = async (req, res) => {
   const authorId = req.id;
@@ -108,8 +109,28 @@ export const likePost = async (req, res) => {
     await post.save();
 
     // socket for realtime notification
-    return res.status(200).json({message:"like added successfully"})
-  } catch (error) {}
+
+    const user = await User.findById(likeUserId).select(
+      "username profilePicture",
+    );
+    const postOwnerId = post.author.toString();
+
+    if (likeUserId != postOwnerId) {
+      const notification = {
+        type: "like",
+        userId: likeUserId,
+        userDetails: user,
+        postId,
+        message: "Your post was liked",
+      };
+      const postOwnerSocketId = getReciverSocketId(postOwnerId);
+      io.to(postOwnerSocketId).emit('notification', notification);
+    }
+
+    return res.status(200).json({ message: "like added successfully" });
+  } catch (error) {
+    console.log(error)
+  }
 };
 
 export const dislikePost = async (req, res) => {
@@ -124,55 +145,64 @@ export const dislikePost = async (req, res) => {
 
     await post.updateOne({ $pull: { likes: userId } });
     await post.save();
-    // socket for realtime notificatio
-  } catch (error) {}
+  } catch (error) {
+    console.log(error)
+  }
 };
 
 export const addComment = async (req, res) => {
-    try {
-        const postId = req.params.id;
-        const commentUserId = req.id;
-        const {text} = req.body;
-        
-        const post = await Post.findById(postId);
-        if(!text) return res.status(400).json({message:'text is required', success:false});
+  try {
+    const postId = req.params.id;
+    const commentUserId = req.id;
+    const { text } = req.body;
 
-        const comment = await Comment.create({
-            text,
-            author:commentUserId,
-            post:postId
-        })
-        await comment.populate({
-            path:'author',
-            select:"username profilePicture"
-        });
+    const post = await Post.findById(postId);
+    if (!text)
+      return res
+        .status(400)
+        .json({ message: "text is required", success: false });
 
-         post.comments.push(comment._id);
-        await post.save();
+    const comment = await Comment.create({
+      text,
+      author: commentUserId,
+      post: postId,
+    });
+    await comment.populate({
+      path: "author",
+      select: "username profilePicture",
+    });
 
-        return res.status(201).json({
-            message:'Comment Added',
-            comment,
-            success:true
-        })
-    } catch (error) {
-        console.log(error);
-    }
+    post.comments.push(comment._id);
+    await post.save();
+
+    return res.status(201).json({
+      message: "Comment Added",
+      comment,
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const getCommentsOfPost = async (req, res) => {
-    try {
-        const postId = req.params.id;
+  try {
+    const postId = req.params.id;
 
-        const comments = await Comment.find({post:postId}).populate('author', 'username profilePicture');
+    const comments = await Comment.find({ post: postId }).populate(
+      "author",
+      "username profilePicture",
+    );
 
-        if(!comments) return res.status(404).json({message:'No comments found for this post', success:false});
+    if (!comments)
+      return res
+        .status(404)
+        .json({ message: "No comments found for this post", success: false });
 
-        return res.status(200).json({success:true,comments});
-
-    } catch (error) {
-        console.log(error);
-    }
+    return res.status(200).json({ success: true, comments });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const deletePost = async (req, res) => {
