@@ -3,7 +3,7 @@ import cloudinary from "../utils/cloudinary.js";
 import { User } from "../models/user.model.js";
 import { Post } from "../models/post.model.js";
 import { Comment } from "../models/comments.model.js";
-import { getReciverSocketId, io } from "../socket/socket.js";
+import { getReciverSocketId } from "../socket/socket.js";
 
 export const addPost = async (req, res) => {
   const authorId = req.id;

@@ -10,6 +10,6 @@ userRouter.get('/logout',logout);
 userRouter.get('/getUser/:id',isAuth,getProfile);
 userRouter.post('/profile/edit',isAuth,editProfile);
 userRouter.post('/followorunfollow/:id',isAuth,followOrUnfollow);
-userRouter.post('/getSuggest-user',isAuth,getSuggestedUsers);
+userRouter.get('/getSuggest-user',isAuth,getSuggestedUsers);
 
 export default userRouter;
